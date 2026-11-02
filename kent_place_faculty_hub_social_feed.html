@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kent Place School | Curriculum & Faculty Feed</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        kps: {
+                            green: '#004B23',
+                            darkgreen: '#003318',
+                            lightgreen: '#006630',
+                            gold: '#D4AF37',
+                            accentgold: '#F3C044',
+                            lightgold: '#FDF8E8',
+                            bg: '#F8FAF9'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAF9;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d4af37;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-kps-bg min-h-screen flex flex-col antialiased text-slate-800">
+
+    <!-- Kent Place Header -->
+    <header class="bg-kps-green text-white shadow-lg border-b-4 border-kps-gold sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- School Brand / Header Title -->
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <!-- Official Kent Place School Seal Logo Badge -->
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white flex items-center justify-center p-1 shadow-md flex-shrink-0 border-2 border-kps-gold">
+                        <!-- Precise SVG Vector Replica of Kent Place Candle & Feather Quill Seal -->
+                        <svg viewBox="0 0 100 100" class="w-full h-full text-kps-green" fill="none" stroke="currentColor">
+                            <!-- Outer Ring -->
+                            <circle cx="50" cy="50" r="46" stroke-width="3" />
+                            <!-- Inner Ring -->
+                            <circle cx="50" cy="50" r="39" stroke-width="2" />
+                            
+                            <!-- Candle Base & Holder Loop -->
+                            <path d="M 32 68 L 52 68 L 50 72 L 34 72 Z" fill="#004B23" stroke="none"/>
+                            <path d="M 28 66 C 22 66, 22 74, 28 74 L 33 74" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                            <rect x="39" y="48" width="6" height="20" rx="1" fill="#004B23" stroke="none"/>
+                            
+                            <!-- Candle Flame -->
+                            <path d="M 42 48 C 40 43, 38 40, 42 34 C 46 40, 44 43, 42 48 Z" fill="#004B23" stroke="none"/>
+                            
+                            <!-- Inkwell Base -->
+                            <path d="M 50 68 L 60 68 L 58 72 L 52 72 Z" fill="#004B23" stroke="none"/>
+                            
+                            <!-- Feather Quill Pen -->
+                            <path d="M 44 68 Q 58 52 72 32 C 68 38 62 48 56 58 Q 52 64 44 68 Z" fill="#004B23" stroke="none"/>
+                            <path d="M 44 68 L 74 30" stroke-width="2" stroke-linecap="round"/>
+                            <!-- Feather Details -->
+                            <path d="M 60 48 Q 66 45 70 42" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M 56 53 Q 62 50 66 47" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg md:text-xl font-serif font-bold tracking-wider text-white leading-tight uppercase">
+                            Kent Place School
+                        </h1>
+                        <span class="text-[10px] sm:text-xs uppercase tracking-widest text-kps-gold font-bold block">
+                            Curriculum AI Highlights
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Discrete Admin Toggle (Hidden from regular view) -->
+                    <button type="button" id="gearAdminBtn" onclick="openAdminAuthModal()" title="Backend Settings" class="p-2 text-white/60 hover:text-white transition focus:outline-none cursor-pointer">
+                        <i class="fa-solid fa-gear text-sm"></i>
+                    </button>
+
+                    <!-- Direct Link to Form -->
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeVzFzx47LyEXheEKlNNd_AUqMXVffZAi2R5O0cMQjTdam9kg/viewform" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="bg-kps-gold hover:bg-kps-accentgold text-kps-darkgreen font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow-md transition flex items-center space-x-2 transform active:scale-95">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                        <span>New Faculty Post</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-0.5 opacity-70"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Curriculum Highlight Ticker Banner -->
+        <div class="bg-kps-darkgreen py-2 px-4 border-t border-white/10">
+            <div class="max-w-7xl mx-auto flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-2 truncate">
+                    <span class="bg-kps-gold text-kps-darkgreen text-[10px] font-black uppercase px-2 py-0.5 rounded flex-shrink-0 flex items-center space-x-1">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Spotlight</span>
+                    </span>
+                    <span id="aiHighlightText" class="text-slate-200 truncate font-medium"></span>
+                </div>
+                <button onclick="cycleAiHighlight()" class="text-kps-gold hover:underline text-[11px] font-semibold flex-shrink-0 ml-3 flex items-center space-x-1">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span class="hidden sm:inline">Next Idea</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hidden Backend Admin Configuration Drawer -->
+    <div id="adminPanel" class="hidden bg-slate-900 text-slate-100 border-b border-slate-700 shadow-inner py-4 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-kps-gold text-kps-darkgreen text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">Admin Backend</span>
+                    <h3 class="font-bold text-sm text-white">Google Sheet Apps Script Endpoint</h3>
+                </div>
+                <p class="text-xs text-slate-400">Paste your deployed Google Apps Script URL to fetch live responses from your Google Sheet.</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center w-full md:w-auto gap-2">
+                <input type="url" id="sheetApiUrl" placeholder="Paste Apps Script Exec URL..." class="text-xs p-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 focus:ring-2 focus:ring-kps-gold outline-none w-full sm:w-80 font-mono">
+                <button onclick="saveSheetUrl()" class="bg-kps-gold hover:bg-kps-accentgold text-kps-darkgreen text-xs px-4 py-2.5 rounded-lg font-bold transition flex-shrink-0">
+                    Connect Sheet
+                </button>
+                <button onclick="showScriptGuideModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2.5 rounded-lg font-semibold border border-slate-700 transition flex-shrink-0 flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-code text-kps-gold"></i>
+                    <span>Apps Script Code</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Passcode Modal -->
+    <div id="adminAuthModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-lock text-kps-green"></i>
+                    <span>Faculty Admin Access</span>
+                </h3>
+                <button type="button" onclick="closeAdminAuthModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-600">Please enter the administrator secret passcode to unlock the backend Google Sheet settings.</p>
+            
+            <div class="space-y-2">
+                <input type="password" id="adminPasscodeInput" placeholder="Enter passcode..." class="w-full text-sm p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-kps-green outline-none font-mono tracking-widest text-center" onkeydown="if(event.key === 'Enter') submitAdminPasscode()">
+                <p id="adminAuthError" class="text-[11px] text-rose-600 font-semibold hidden text-center"><i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect secret passcode.</p>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button type="button" onclick="closeAdminAuthModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2.5 rounded-xl font-bold transition">
+                    Cancel
+                </button>
+                <button type="button" onclick="submitAdminPasscode()" class="w-1/2 bg-kps-green hover:bg-kps-darkgreen text-white text-xs py-2.5 rounded-xl font-bold transition">
+                    Unlock
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Live Feed Container (3 Divisions) -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Top Banner Bar -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                <div>
+                    <h2 class="font-bold text-slate-800 text-sm">Live Faculty Feed</h2>
+                    <p class="text-xs text-slate-500">Live submissions categorized by school division</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span id="postCountBadge" class="bg-kps-lightgold text-kps-green font-bold px-3 py-1 rounded-full border border-kps-gold/30">
+                    Loading breakdown...
+                </span>
+                <button onclick="fetchPosts()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg font-semibold transition">
+                    <i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- 3 Divisions Grid Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- 1. PRIMARY SCHOOL DIVISION (PreK - 5th Grade) -->
+            <div class="flex flex-col bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <!-- Division Header -->
+                <div class="bg-kps-green text-white p-4 flex items-center justify-between border-b-4 border-kps-gold">
+                    <div class="flex items-center space-x-2.5">
+                        <i class="fa-solid fa-child-reaching text-kps-gold text-lg"></i>
+                        <div>
+                            <h3 class="font-extrabold text-sm tracking-wide">PRIMARY SCHOOL</h3>
+                            <p class="text-[10px] text-kps-gold font-medium">Grades PreK – 5</p>
+                        </div>
+                    </div>
+                    <span id="primaryCount" class="bg-white/20 text-white font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+
+                <!-- Feed Column -->
+                <div id="primaryFeed" class="p-4 space-y-4 flex-1 overflow-y-auto max-h-[800px] custom-scrollbar">
+                    <!-- Primary posts populated here -->
+                </div>
+            </div>
+
+            <!-- 2. MIDDLE SCHOOL DIVISION (6th - 8th Grade) -->
+            <div class="flex flex-col bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <!-- Division Header -->
+                <div class="bg-kps-green text-white p-4 flex items-center justify-between border-b-4 border-kps-gold">
+                    <div class="flex items-center space-x-2.5">
+                        <i class="fa-solid fa-icons text-kps-gold text-lg"></i>
+                        <div>
+                            <h3 class="font-extrabold text-sm tracking-wide">MIDDLE SCHOOL</h3>
+                            <p class="text-[10px] text-kps-gold font-medium">Grades 6 – 8</p>
+                        </div>
+                    </div>
+                    <span id="middleCount" class="bg-white/20 text-white font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+
+                <!-- Feed Column -->
+                <div id="middleFeed" class="p-4 space-y-4 flex-1 overflow-y-auto max-h-[800px] custom-scrollbar">
+                    <!-- Middle posts populated here -->
+                </div>
+            </div>
+
+            <!-- 3. UPPER SCHOOL DIVISION (9th - 12th Grade) -->
+            <div class="flex flex-col bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <!-- Division Header -->
+                <div class="bg-kps-green text-white p-4 flex items-center justify-between border-b-4 border-kps-gold">
+                    <div class="flex items-center space-x-2.5">
+                        <i class="fa-solid fa-graduation-cap text-kps-gold text-lg"></i>
+                        <div>
+                            <h3 class="font-extrabold text-sm tracking-wide">UPPER SCHOOL</h3>
+                            <p class="text-[10px] text-kps-gold font-medium">Grades 9 – 12</p>
+                        </div>
+                    </div>
+                    <span id="upperCount" class="bg-white/20 text-white font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+
+                <!-- Feed Column -->
+                <div id="upperFeed" class="p-4 space-y-4 flex-1 overflow-y-auto max-h-[800px] custom-scrollbar">
+                    <!-- Upper posts populated here -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Apps Script Code Setup Modal -->
+    <div id="scriptModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center space-x-2">
+                    <i class="fa-solid fa-code text-kps-green"></i>
+                    <span>Google Apps Script Setup Code</span>
+                </h3>
+                <button onclick="closeScriptGuideModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-600">Paste this script in your Google Sheet's <strong>Extensions &gt; Apps Script</strong> and deploy as a Web App (Execute as: Me, Who has access: Anyone):</p>
+            
+            <div class="bg-slate-900 text-emerald-400 p-4 rounded-xl text-xs font-mono overflow-x-auto relative">
+                <pre id="codeSnippet">function doGet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var rows = data.slice(1);
+  
+  var result = rows.map(function(row) {
+    var obj = {};
+    headers.forEach(function(header, index) {
+      obj[header] = row[index];
+    });
+    return obj;
+  });
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+                <button onclick="copyScriptCode()" class="absolute top-2 right-2 bg-slate-800 hover:bg-slate-700 text-white text-[10px] px-2.5 py-1 rounded border border-slate-700">
+                    Copy Code
+                </button>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeScriptGuideModal()" class="bg-kps-green text-white text-xs px-4 py-2 rounded-lg font-bold">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Data Engine -->
+    <script>
+        // AI Curriculum Highlight Bank
+        const aiHighlights = [
+            "Primary Literacy: Interdisciplinary storytelling with digital illustration & voice recordings.",
+            "Middle School Science: Environmental water quality testing in local Summit ecosystems.",
+            "Upper School Humanities: Modern Ethics & AI research paper and debate series.",
+            "All-School Arts: Interactive digital canvas collaboration across divisions.",
+            "Primary Math: Hands-on spatial geometry through architectural model building."
+        ];
+        let currentHighlightIndex = 0;
+
+        // Sample Seed Posts mapping to Primary, Middle, and Upper divisions
+        const defaultPosts = [
+            // Primary (PreK - 5)
+            {
+                id: 1,
+                name: "Dr. Sarah Jenkins",
+                department: "Primary STEM",
+                division: "Primary School",
+                grade: "2nd Grade",
+                type: "Lesson Showcase",
+                title: "Butterflies & Metamorphosis Project",
+                message: "Our 2nd graders finished documenting their monarch butterfly lifecycle journals today! So proud of their observation skills.",
+                mediaUrl: "https://images.unsplash.com/photo-1557008075-7f2c5efa4cfd?auto=format&fit=crop&w=600&q=80",
+                mediaType: "photo",
+                mediaTitle: "Monarch Lifecycle Journal.jpg",
+                date: "2 hours ago",
+                likes: 12
+            },
+            {
+                id: 2,
+                name: "Maria Ramos",
+                department: "World Languages",
+                division: "Primary School",
+                grade: "4th Grade",
+                type: "Shoutout / Kudos",
+                title: "Spanish Cultural Fair Success",
+                message: "Huge shoutout to the 4th grade team for helping organize the heritage presentations. The students spoke fluent Spanish!",
+                mediaUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80",
+                mediaType: "photo",
+                mediaTitle: "Heritage Fair Group Photo.jpg",
+                date: "Yesterday",
+                likes: 8
+            },
+
+            // Middle (6 - 8)
+            {
+                id: 3,
+                name: "Coach Dave Miller",
+                department: "Athletics & PE",
+                division: "Middle School",
+                grade: "7th Grade",
+                type: "Announcement",
+                title: "Middle School Track Meet Victory",
+                message: "Congrats to our 7th and 8th grade track & field student-athletes for a stellar performance at yesterday's invitational!",
+                mediaUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80",
+                mediaType: "photo",
+                mediaTitle: "Track Meet Champions.jpg",
+                date: "3 hours ago",
+                likes: 19
+            },
+            {
+                id: 4,
+                name: "Elena Rostova",
+                department: "Humanities & History",
+                division: "Middle School",
+                grade: "8th Grade",
+                type: "Lesson Showcase",
+                title: "Mock Constitution Convention",
+                message: "8th graders debated historical amendments with incredible rigor today. AI research tools helped them cite primary documents.",
+                mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-document-or-paper-41132-large.mp4",
+                mediaType: "video",
+                mediaTitle: "Constitutional Debate Highlights.mp4",
+                date: "1 day ago",
+                likes: 14
+            },
+
+            // Upper (9 - 12)
+            {
+                id: 5,
+                name: "Dr. Robert Vance",
+                department: "Science / Physics",
+                division: "Upper School",
+                grade: "11th Grade",
+                type: "Resource Sharing",
+                title: "Solar Robotics Design Lab",
+                message: "Sharing our AP Physics 11th grade solar battery CAD templates with any faculty interested in renewable tech projects.",
+                mediaUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+                mediaType: "file",
+                mediaTitle: "AP_Physics_Solar_Robotics_CAD_Guide.pdf",
+                date: "5 hours ago",
+                likes: 24
+            },
+            {
+                id: 6,
+                name: "Amanda Chen",
+                department: "Arts & Visual Design",
+                division: "Upper School",
+                grade: "12th Grade",
+                type: "Shoutout / Kudos",
+                title: "Senior Portfolio Gallery Night",
+                message: "Please join us this Thursday evening in the Fine Arts wing to celebrate our 12th Grade Senior Art Exhibit!",
+                mediaUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80",
+                mediaType: "photo",
+                mediaTitle: "Senior Art Gallery Invitation.jpg",
+                date: "2 days ago",
+                likes: 31
+            }
+        ];
+
+        let livePosts = [...defaultPosts];
+
+        // Initialize Page
+        window.onload = function() {
+            cycleAiHighlight();
+            
+            // Check stored Apps Script URL
+            const storedUrl = localStorage.getItem('kps_sheet_url');
+            if (storedUrl) {
+                document.getElementById('sheetApiUrl').value = storedUrl;
+                fetchLiveSheetData(storedUrl);
+            } else {
+                renderFeeds(livePosts);
+            }
+        };
+
+        // Cycle AI Highlights
+        function cycleAiHighlight() {
+            const el = document.getElementById('aiHighlightText');
+            if (el) {
+                el.textContent = aiHighlights[currentHighlightIndex];
+                currentHighlightIndex = (currentHighlightIndex + 1) % aiHighlights.length;
+            }
+        }
+
+        // Open Admin Auth Modal when Gear Icon is clicked
+        function openAdminAuthModal() {
+            const panel = document.getElementById('adminPanel');
+            // If admin panel is already unlocked & visible, toggle it closed
+            if (panel && !panel.classList.contains('hidden')) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            const modal = document.getElementById('adminAuthModal');
+            const input = document.getElementById('adminPasscodeInput');
+            const err = document.getElementById('adminAuthError');
+            if (modal) {
+                if (err) err.classList.add('hidden');
+                if (input) input.value = '';
+                modal.classList.remove('hidden');
+                setTimeout(() => { if (input) input.focus(); }, 100);
+            }
+        }
+
+        function closeAdminAuthModal() {
+            const modal = document.getElementById('adminAuthModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // Verify Secret Admin Passcode
+        function submitAdminPasscode() {
+            const input = document.getElementById('adminPasscodeInput');
+            const err = document.getElementById('adminAuthError');
+            const panel = document.getElementById('adminPanel');
+
+            if (input && input.value.trim() === "189442") {
+                closeAdminAuthModal();
+                if (panel) panel.classList.remove('hidden');
+            } else {
+                if (err) err.classList.remove('hidden');
+            }
+        }
+
+        // Save Google Apps Script URL
+        function saveSheetUrl() {
+            const url = document.getElementById('sheetApiUrl').value.trim();
+            if (url) {
+                localStorage.setItem('kps_sheet_url', url);
+                fetchLiveSheetData(url);
+            }
+        }
+
+        // Fetch Live Data from Google Apps Script Web App
+        function fetchLiveSheetData(url) {
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data) && data.length > 0) {
+                        // Normalize Google Form row key names
+                        livePosts = data.map((item, idx) => {
+                            const name = item["Faculty Name"] || item["Name"] || "Kent Place Teacher";
+                            const dept = item["Department"] || "Faculty";
+                            const division = item["School Division"] || item["Division"] || parseDivisionFromGrade(item["Grade / Division"] || item["Grade"]);
+                            const grade = item["Grade / Division"] || item["Grade"] || "General";
+                            const type = item["Post Category"] || item["Type"] || "Announcement";
+                            const title = item["Title / Topic"] || item["Title"] || "Faculty Update";
+                            const message = item["Message / Details"] || item["Message"] || item["Details"] || "";
+                            const mediaUrl = item["Photo/Video/File Link"] || item["Photo Link"] || item["Media URL"] || item["Attachment"] || "";
+                            const mediaType = detectMediaType(mediaUrl);
+                            const mediaTitle = item["File Title"] || extractFileName(mediaUrl) || "Attached Resource";
+                            
+                            return {
+                                id: idx + 100,
+                                name,
+                                department: dept,
+                                division,
+                                grade,
+                                type,
+                                title,
+                                message,
+                                mediaUrl,
+                                mediaType,
+                                mediaTitle,
+                                date: "Live Form Data",
+                                likes: Math.floor(Math.random() * 10) + 1
+                            };
+                        });
+                        renderFeeds(livePosts);
+                    }
+                })
+                .catch(err => {
+                    console.log("Sheet fetch fallback to default feed", err);
+                    renderFeeds(livePosts);
+                });
+        }
+
+        // Detect media type based on URL extension
+        function detectMediaType(url) {
+            if (!url) return null;
+            const u = url.toLowerCase();
+            if (u.match(/\.(jpeg|jpg|gif|png|webp|svg)/) || u.includes("images.unsplash.com")) return "photo";
+            if (u.match(/\.(mp4|webm|ogg|mov)/) || u.includes("mixkit") || u.includes("youtube") || u.includes("vimeo")) return "video";
+            return "file";
+        }
+
+        // Helper to parse grade/division string into standardized division
+        function parseDivisionFromGrade(gradeStr) {
+            if (!gradeStr) return "Primary School";
+            const str = String(gradeStr).toLowerCase();
+
+            // Direct division matches
+            if (str.includes("primary") || str.includes("prek") || str.includes("kindergarten") || str.includes("k-5")) {
+                return "Primary School";
+            }
+            if (str.includes("middle") || str.includes("6-8")) {
+                return "Middle School";
+            }
+            if (str.includes("upper") || str.includes("high") || str.includes("9-12")) {
+                return "Upper School";
+            }
+
+            // Extract numerical grade values
+            const match = str.match(/\d+/);
+            if (match) {
+                const gradeNum = parseInt(match[0], 10);
+                if (gradeNum >= 0 && gradeNum <= 5) return "Primary School";
+                if (gradeNum >= 6 && gradeNum <= 8) return "Middle School";
+                if (gradeNum >= 9 && gradeNum <= 12) return "Upper School";
+            }
+
+            return "Primary School";
+        }
+
+        function extractFileName(url) {
+            if (!url) return "";
+            try {
+                const name = url.split('/').pop().split('?')[0];
+                return name.length > 30 ? name.substring(0, 27) + "..." : name;
+            } catch(e) {
+                return "Attached File";
+            }
+        }
+
+        // Render Posts into Primary, Middle, and Upper Columns
+        function renderFeeds(posts) {
+            const primaryFeed = document.getElementById('primaryFeed');
+            const middleFeed = document.getElementById('middleFeed');
+            const upperFeed = document.getElementById('upperFeed');
+
+            const primaryPosts = posts.filter(p => parseDivisionFromGrade(p.division || p.grade) === "Primary School");
+            const middlePosts = posts.filter(p => parseDivisionFromGrade(p.division || p.grade) === "Middle School");
+            const upperPosts = posts.filter(p => parseDivisionFromGrade(p.division || p.grade) === "Upper School");
+
+            document.getElementById('primaryCount').textContent = primaryPosts.length;
+            document.getElementById('middleCount').textContent = middlePosts.length;
+            document.getElementById('upperCount').textContent = upperPosts.length;
+            
+            // Detailed breakdown displaying counts for all 3 categories
+            document.getElementById('postCountBadge').innerHTML = `
+                <span class="font-extrabold text-kps-green">${posts.length} Total Posts</span>
+                <span class="mx-1 text-kps-gold">•</span>
+                <span>Primary: ${primaryPosts.length}</span>
+                <span class="mx-1 text-kps-gold">•</span>
+                <span>Middle: ${middlePosts.length}</span>
+                <span class="mx-1 text-kps-gold">•</span>
+                <span>Upper: ${upperPosts.length}</span>
+            `;
+
+            primaryFeed.innerHTML = primaryPosts.length > 0 
+                ? primaryPosts.map(createPostCardHTML).join('') 
+                : createEmptyStateHTML("Primary School (PreK–5)");
+
+            middleFeed.innerHTML = middlePosts.length > 0 
+                ? middlePosts.map(createPostCardHTML).join('') 
+                : createEmptyStateHTML("Middle School (6–8)");
+
+            upperFeed.innerHTML = upperPosts.length > 0 
+                ? upperPosts.map(createPostCardHTML).join('') 
+                : createEmptyStateHTML("Upper School (9–12)");
+        }
+
+        // Generate Post Card HTML
+        function createPostCardHTML(post) {
+            return `
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-9 h-9 rounded-full bg-kps-lightgold text-kps-darkgreen border border-kps-gold flex items-center justify-center font-bold text-xs">
+                                ${post.name ? post.name.split(' ').map(n => n[0]).join('') : 'KP'}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-800 leading-snug">${escapeHtml(post.name)}</h4>
+                                <p class="text-[10px] text-slate-500 font-medium">${escapeHtml(post.department)} • ${escapeHtml(post.grade)}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-200/50">
+                            ${escapeHtml(post.type)}
+                        </span>
+                    </div>
+
+                    <div>
+                        <h5 class="font-bold text-xs text-kps-green mb-1">${escapeHtml(post.title)}</h5>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-2">${escapeHtml(post.message)}</p>
+
+                        <!-- Media Attachment Box -->
+                        ${renderMediaAttachment(post)}
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                        <span><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(post.date)}</span>
+                        <button onclick="likePost(this, ${post.likes})" class="hover:text-rose-500 transition flex items-center space-x-1 font-semibold text-slate-500">
+                            <i class="fa-regular fa-heart"></i>
+                            <span>${post.likes}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render Media Attachment HTML (Photos, Videos, PDFs/Files)
+        function renderMediaAttachment(post) {
+            if (!post.mediaUrl) return '';
+
+            const title = escapeHtml(post.mediaTitle || 'Attached Media');
+            const url = escapeHtml(post.mediaUrl);
+
+            if (post.mediaType === 'photo') {
+                return `
+                    <div class="mt-2 rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
+                        <div class="bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 flex items-center justify-between border-b border-slate-200">
+                            <span class="truncate"><i class="fa-solid fa-image text-kps-green mr-1.5"></i>${title}</span>
+                            <span class="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Photo</span>
+                        </div>
+                        <a href="${url}" target="_blank" class="block group relative overflow-hidden">
+                            <img src="${url}" alt="${title}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=&quot;p-3 text-[11px] text-slate-500 italic&quot;><i class=&quot;fa-solid fa-paperclip mr-1&quot;></i>${title}</div>';">
+                        </a>
+                    </div>
+                `;
+            } else if (post.mediaType === 'video') {
+                return `
+                    <div class="mt-2 rounded-lg border border-slate-200 overflow-hidden bg-slate-900 text-white">
+                        <div class="bg-slate-800 px-2.5 py-1 text-[10px] font-bold text-slate-200 flex items-center justify-between border-b border-slate-700">
+                            <span class="truncate"><i class="fa-solid fa-video text-kps-gold mr-1.5"></i>${title}</span>
+                            <span class="text-[9px] uppercase tracking-wider text-kps-gold font-semibold">Video</span>
+                        </div>
+                        <video controls class="w-full h-40 object-cover bg-black">
+                            <source src="${url}">
+                            Your browser does not support video playback.
+                        </video>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="mt-2 rounded-lg border border-slate-200 bg-kps-lightgold/50 p-2.5 flex items-center justify-between hover:border-kps-gold transition">
+                        <div class="flex items-center space-x-2.5 truncate">
+                            <div class="w-8 h-8 rounded-lg bg-kps-green text-kps-gold flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-sm">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            <div class="truncate">
+                                <p class="text-[11px] font-bold text-slate-800 truncate leading-snug">${title}</p>
+                                <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Document / Attachment</p>
+                            </div>
+                        </div>
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="bg-kps-green hover:bg-kps-darkgreen text-white text-[10px] px-2.5 py-1.5 rounded-md font-bold transition flex items-center space-x-1 flex-shrink-0 ml-2">
+                            <span>Open</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        // Empty state card generator
+        function createEmptyStateHTML(divisionName) {
+            return `
+                <div class="bg-white rounded-xl p-6 text-center border border-dashed border-slate-300 text-slate-400 space-y-2">
+                    <i class="fa-regular fa-folder-open text-2xl text-slate-300"></i>
+                    <p class="text-xs font-medium">No posts submitted for ${divisionName} yet.</p>
+                </div>
+            `;
+        }
+
+        // Helper to escape HTML string
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // Like button toggle handler
+        function likePost(btn, currentLikes) {
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            if (icon.classList.contains('fa-regular')) {
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid', 'text-rose-500');
+                span.textContent = currentLikes + 1;
+            } else {
+                icon.classList.remove('fa-solid', 'text-rose-500');
+                icon.classList.add('fa-regular');
+                span.textContent = currentLikes;
+            }
+        }
+
+        // Modal triggers for Apps Script guide
+        function showScriptGuideModal() {
+            document.getElementById('scriptModal').classList.remove('hidden');
+        }
+
+        function closeScriptGuideModal() {
+            document.getElementById('scriptModal').classList.add('hidden');
+        }
+
+        function copyScriptCode() {
+            const code = document.getElementById('codeSnippet').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Apps Script code copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
