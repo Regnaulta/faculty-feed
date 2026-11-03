@@ -123,9 +123,9 @@
                 <div class="flex items-center space-x-2 truncate">
                     <span class="bg-kps-gold text-kps-darkgreen text-[10px] font-black uppercase px-2 py-0.5 rounded flex-shrink-0 flex items-center space-x-1">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        <span>Spotlight</span>
+                        <span>Latest Spotlight</span>
                     </span>
-                    <span id="aiHighlightText" class="text-slate-200 truncate font-medium"></span>
+                    <span id="aiHighlightText" class="text-slate-200 truncate font-medium">Loading latest submission...</span>
                 </div>
                 <button onclick="cycleAiHighlight()" class="text-kps-gold hover:underline text-[11px] font-semibold flex-shrink-0 ml-3 flex items-center space-x-1">
                     <i class="fa-solid fa-arrows-rotate"></i>
@@ -205,7 +205,7 @@
             
             <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span id="postCountBadge" class="bg-kps-lightgold text-kps-green font-bold px-3 py-1 rounded-full border border-kps-gold/30">
-                    Loading breakdown...
+                    Loading responses...
                 </span>
                 <button onclick="fetchPosts()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg font-semibold transition">
                     <i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh
@@ -298,13 +298,19 @@
                 <pre id="codeSnippet">function doGet() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var data = sheet.getDataRange().getValues();
+  
+  if (data.length <= 1) {
+    return ContentService.createTextOutput(JSON.stringify([]))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   var headers = data[0];
   var rows = data.slice(1);
   
   var result = rows.map(function(row) {
     var obj = {};
     headers.forEach(function(header, index) {
-      obj[header] = row[index];
+      obj[header.trim()] = row[index];
     });
     return obj;
   });
@@ -337,122 +343,48 @@
         ];
         let currentHighlightIndex = 0;
 
-        // Sample Seed Posts mapping to Primary, Middle, and Upper divisions
-        const defaultPosts = [
-            // Primary (PreK - 5)
-            {
-                id: 1,
-                name: "Dr. Sarah Jenkins",
-                department: "Primary STEM",
-                division: "Primary School",
-                grade: "2nd Grade",
-                type: "Lesson Showcase",
-                title: "Butterflies & Metamorphosis Project",
-                message: "Our 2nd graders finished documenting their monarch butterfly lifecycle journals today! So proud of their observation skills.",
-                mediaUrl: "https://images.unsplash.com/photo-1557008075-7f2c5efa4cfd?auto=format&fit=crop&w=600&q=80",
-                mediaType: "photo",
-                mediaTitle: "Monarch Lifecycle Journal.jpg",
-                date: "2 hours ago",
-                likes: 12
-            },
-            {
-                id: 2,
-                name: "Maria Ramos",
-                department: "World Languages",
-                division: "Primary School",
-                grade: "4th Grade",
-                type: "Shoutout / Kudos",
-                title: "Spanish Cultural Fair Success",
-                message: "Huge shoutout to the 4th grade team for helping organize the heritage presentations. The students spoke fluent Spanish!",
-                mediaUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80",
-                mediaType: "photo",
-                mediaTitle: "Heritage Fair Group Photo.jpg",
-                date: "Yesterday",
-                likes: 8
-            },
+        // Hardcoded Permanent Google Apps Script Endpoint
+        const DEFAULT_SHEET_URL = "https://script.google.com/macros/s/AKfycbz72BnpLi_XfVPSrYeQM9J8p567Og6VCpcHBF7HLelwv9fqE3X7dO-TUxkwMENoRUpj/exec";
 
-            // Middle (6 - 8)
-            {
-                id: 3,
-                name: "Coach Dave Miller",
-                department: "Athletics & PE",
-                division: "Middle School",
-                grade: "7th Grade",
-                type: "Announcement",
-                title: "Middle School Track Meet Victory",
-                message: "Congrats to our 7th and 8th grade track & field student-athletes for a stellar performance at yesterday's invitational!",
-                mediaUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80",
-                mediaType: "photo",
-                mediaTitle: "Track Meet Champions.jpg",
-                date: "3 hours ago",
-                likes: 19
-            },
-            {
-                id: 4,
-                name: "Elena Rostova",
-                department: "Humanities & History",
-                division: "Middle School",
-                grade: "8th Grade",
-                type: "Lesson Showcase",
-                title: "Mock Constitution Convention",
-                message: "8th graders debated historical amendments with incredible rigor today. AI research tools helped them cite primary documents.",
-                mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-document-or-paper-41132-large.mp4",
-                mediaType: "video",
-                mediaTitle: "Constitutional Debate Highlights.mp4",
-                date: "1 day ago",
-                likes: 14
-            },
+        // Auto-refresh interval (30 seconds)
+        const AUTO_REFRESH_INTERVAL_MS = 30000;
+        let autoRefreshTimer = null;
 
-            // Upper (9 - 12)
-            {
-                id: 5,
-                name: "Dr. Robert Vance",
-                department: "Science / Physics",
-                division: "Upper School",
-                grade: "11th Grade",
-                type: "Resource Sharing",
-                title: "Solar Robotics Design Lab",
-                message: "Sharing our AP Physics 11th grade solar battery CAD templates with any faculty interested in renewable tech projects.",
-                mediaUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-                mediaType: "file",
-                mediaTitle: "AP_Physics_Solar_Robotics_CAD_Guide.pdf",
-                date: "5 hours ago",
-                likes: 24
-            },
-            {
-                id: 6,
-                name: "Amanda Chen",
-                department: "Arts & Visual Design",
-                division: "Upper School",
-                grade: "12th Grade",
-                type: "Shoutout / Kudos",
-                title: "Senior Portfolio Gallery Night",
-                message: "Please join us this Thursday evening in the Fine Arts wing to celebrate our 12th Grade Senior Art Exhibit!",
-                mediaUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80",
-                mediaType: "photo",
-                mediaTitle: "Senior Art Gallery Invitation.jpg",
-                date: "2 days ago",
-                likes: 31
-            }
-        ];
-
-        let livePosts = [...defaultPosts];
+        // Clean initial state (No mock/placeholder posts)
+        let livePosts = [];
 
         // Initialize Page
         window.onload = function() {
             cycleAiHighlight();
+            fetchPosts();
             
-            // Check stored Apps Script URL
-            const storedUrl = localStorage.getItem('kps_sheet_url');
-            if (storedUrl) {
-                document.getElementById('sheetApiUrl').value = storedUrl;
-                fetchLiveSheetData(storedUrl);
-            } else {
-                renderFeeds(livePosts);
-            }
+            // Start automatic background polling every 30 seconds
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            autoRefreshTimer = setInterval(fetchPosts, AUTO_REFRESH_INTERVAL_MS);
         };
 
-        // Cycle AI Highlights
+        // Fetch posts from URL or render clean feed
+        function fetchPosts() {
+            const storedUrl = localStorage.getItem('kps_sheet_url') || DEFAULT_SHEET_URL;
+            document.getElementById('sheetApiUrl').value = storedUrl;
+            fetchLiveSheetData(storedUrl);
+        }
+
+        // Update top banner with the latest submission or cycle fallback spotlights
+        function updateSpotlightBanner() {
+            const el = document.getElementById('aiHighlightText');
+            if (!el) return;
+
+            if (livePosts && livePosts.length > 0) {
+                // Pick the newest post (first entry in array or last submitted)
+                const latest = livePosts[0];
+                el.innerHTML = `<strong class="text-kps-gold">${latest.name} (${latest.grade})</strong>: "${latest.title}" &mdash; <span class="opacity-80">${latest.message.substring(0, 80)}${latest.message.length > 80 ? '...' : ''}</span>`;
+            } else {
+                cycleAiHighlight();
+            }
+        }
+
+        // Cycle AI Highlights when manual toggle is clicked
         function cycleAiHighlight() {
             const el = document.getElementById('aiHighlightText');
             if (el) {
@@ -464,7 +396,6 @@
         // Open Admin Auth Modal when Gear Icon is clicked
         function openAdminAuthModal() {
             const panel = document.getElementById('adminPanel');
-            // If admin panel is already unlocked & visible, toggle it closed
             if (panel && !panel.classList.contains('hidden')) {
                 panel.classList.add('hidden');
                 return;
@@ -502,29 +433,40 @@
 
         // Save Google Apps Script URL
         function saveSheetUrl() {
-            const url = document.getElementById('sheetApiUrl').value.trim();
-            if (url) {
-                localStorage.setItem('kps_sheet_url', url);
-                fetchLiveSheetData(url);
-            }
+            const inputVal = document.getElementById('sheetApiUrl').value.trim();
+            const url = inputVal || DEFAULT_SHEET_URL;
+            localStorage.setItem('kps_sheet_url', url);
+            document.getElementById('sheetApiUrl').value = url;
+            fetchLiveSheetData(url);
         }
 
         // Fetch Live Data from Google Apps Script Web App
         function fetchLiveSheetData(url) {
+            const badge = document.getElementById('postCountBadge');
+            if (badge) badge.textContent = "Fetching responses...";
+
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
                     if (Array.isArray(data) && data.length > 0) {
-                        // Normalize Google Form row key names
+                        // Normalize Google Form row key names by scanning all keys in each object
                         livePosts = data.map((item, idx) => {
-                            const name = item["Faculty Name"] || item["Name"] || "Kent Place Teacher";
-                            const dept = item["Department"] || "Faculty";
-                            const division = item["School Division"] || item["Division"] || parseDivisionFromGrade(item["Grade / Division"] || item["Grade"]);
-                            const grade = item["Grade / Division"] || item["Grade"] || "General";
-                            const type = item["Post Category"] || item["Type"] || "Announcement";
-                            const title = item["Title / Topic"] || item["Title"] || "Faculty Update";
-                            const message = item["Message / Details"] || item["Message"] || item["Details"] || "";
-                            const mediaUrl = item["Photo/Video/File Link"] || item["Photo Link"] || item["Media URL"] || item["Attachment"] || "";
+                            // Extract key-value pairs flexibly
+                            let name = findValueByKeys(item, ["Faculty Name", "Name", "Teacher", "Your Name"]) || "Kent Place Teacher";
+                            let dept = findValueByKeys(item, ["Department", "Dept", "Subject"]) || "Faculty";
+                            let gradeVal = findValueByKeys(item, ["Grade / Division", "Grade", "School Division", "Division", "Grade Level", "What grade level is this for?"]) || findAnyGradeInObject(item);
+                            let type = findValueByKeys(item, ["Post Category", "Type", "Category", "Post Type"]) || "AI Integration";
+                            
+                            // Extract post title without defaulting to generic "Faculty Update"
+                            let title = findValueByKeys(item, ["Title / Topic", "Title", "Topic", "Headline", "AI Tool Used", "Tool Name", "Software/Tool"]);
+                            if (!title || title.trim().toLowerCase() === "faculty update") {
+                                title = extractAiToolHighlight(item) || "AI Tool & Pedagogy Spotlight";
+                            }
+
+                            let message = findValueByKeys(item, ["Message / Details", "Message", "Details", "Description", "Post Details"]) || findAnyLongTextInObject(item) || "";
+                            let mediaUrl = findValueByKeys(item, ["Photo/Video/File Link", "Photo Link", "Media URL", "Attachment", "Link", "File Link", "Photo", "Image", "File", "Upload", "Add File", "Attach File", "Upload File", "File Upload"]) || findAnyUrlInObject(item) || "";
+
+                            const division = parseDivisionFromGrade(gradeVal);
                             const mediaType = detectMediaType(mediaUrl);
                             const mediaTitle = item["File Title"] || extractFileName(mediaUrl) || "Attached Resource";
                             
@@ -533,255 +475,299 @@
                                 name,
                                 department: dept,
                                 division,
-                                grade,
+                                grade: gradeVal || "General",
                                 type,
                                 title,
                                 message,
                                 mediaUrl,
                                 mediaType,
                                 mediaTitle,
-                                date: "Live Form Data",
-                                likes: Math.floor(Math.random() * 10) + 1
+                                timestamp: item["Timestamp"] ? new Date(item["Timestamp"]).getTime() : 0,
+                                date: item["Timestamp"] ? new Date(item["Timestamp"]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "Recently Submitted",
+                                likes: Math.floor(Math.random() * 5) + 1
                             };
                         });
+
+                        // Sort posts so the newest entry is first
+                        livePosts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
                         renderFeeds(livePosts);
+                        updateSpotlightBanner();
+                    } else {
+                        livePosts = [];
+                        renderFeeds([]);
+                        cycleAiHighlight();
+                        if (badge) badge.innerHTML = `<span class="text-amber-600 font-bold">Connected to Sheet (0 responses found yet)</span>`;
                     }
                 })
                 .catch(err => {
-                    console.log("Sheet fetch fallback to default feed", err);
-                    renderFeeds(livePosts);
+                    console.error("Sheet fetch error:", err);
+                    renderFeeds([]);
+                    cycleAiHighlight();
+                    if (badge) badge.innerHTML = `<span class="text-rose-600 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Check Apps Script Web App Permissions ("Anyone")</span>`;
                 });
         }
 
-        // Detect media type based on URL extension
+        // Helper to detect or extract AI tools mentioned in post text
+        function extractAiToolHighlight(item) {
+            const combinedText = JSON.stringify(item).toLowerCase();
+            const aiTools = [
+                "ChatGPT", "Claude", "Gemini", "Canva AI", "Khanmigo", 
+                "Perplexity", "Midjourney", "DALL-E", "MagicSchool AI", 
+                "Diffit", "Padlet AI", "Formative AI", "Quizlet Q-Chat",
+                "Gamma", "CoPilot", "NotebookLM"
+            ];
+
+            for (const tool of aiTools) {
+                if (combinedText.includes(tool.toLowerCase())) {
+                    return `${tool} AI Integration`;
+                }
+            }
+            return "AI Tool Spotlight";
+        }
+
+        // Helper to flexibly find value matching partial header names
+        function findValueByKeys(obj, possibleKeys) {
+            const keys = Object.keys(obj);
+            for (const pKey of possibleKeys) {
+                const foundKey = keys.find(k => k.toLowerCase().trim() === pKey.toLowerCase().trim() || k.toLowerCase().includes(pKey.toLowerCase()));
+                if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== "") {
+                    return String(obj[foundKey]);
+                }
+            }
+            return null;
+        }
+
+        // Helper to search all fields in an object for grade identifiers
+        function findAnyGradeInObject(obj) {
+            for (const key in obj) {
+                const val = String(obj[key]).toLowerCase();
+                if (val.includes("10") || val.includes("9") || val.includes("11") || val.includes("12") || val.includes("upper") || val.includes("middle") || val.includes("primary")) {
+                    return obj[key];
+                }
+            }
+            return "Upper School";
+        }
+
+        // Helper to search all fields in an object for any valid http/https file or drive URL
+        function findAnyUrlInObject(obj) {
+            for (const key in obj) {
+                const val = String(obj[key]).trim();
+                if ((val.startsWith("http://") || val.startsWith("https://")) && !val.includes("script.google.com")) {
+                    return val;
+                }
+            }
+            return "";
+        }
+
+        // Helper to pick main body text if column title is unique
+        function findAnyLongTextInObject(obj) {
+            for (const key in obj) {
+                if (key.toLowerCase() !== "timestamp" && String(obj[key]).length > 15) {
+                    return String(obj[key]);
+                }
+            }
+            return "";
+        }
+
+        // Detect media type based on URL extension or host
         function detectMediaType(url) {
             if (!url) return null;
-            const u = url.toLowerCase();
-            if (u.match(/\.(jpeg|jpg|gif|png|webp|svg)/) || u.includes("images.unsplash.com")) return "photo";
-            if (u.match(/\.(mp4|webm|ogg|mov)/) || u.includes("mixkit") || u.includes("youtube") || u.includes("vimeo")) return "video";
-            return "file";
+            const cleanUrl = url.toLowerCase().trim();
+            
+            // Image extensions or Google Drive image links
+            if (cleanUrl.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) || 
+                cleanUrl.includes("drive.google.com/file") || 
+                cleanUrl.includes("lh3.googleusercontent.com") ||
+                cleanUrl.includes("googleusercontent.com")) {
+                return "image";
+            }
+            
+            // Video extensions
+            if (cleanUrl.match(/\.(mp4|webm|ogg|mov)/i) || cleanUrl.includes("youtube.com") || cleanUrl.includes("youtu.be")) {
+                return "video";
+            }
+            
+            // Document extensions
+            if (cleanUrl.match(/\.(pdf|doc|docx|ppt|pptx|xls|xlsx)/i)) {
+                return "document";
+            }
+            
+            return "link";
         }
 
-        // Helper to parse grade/division string into standardized division
-        function parseDivisionFromGrade(gradeStr) {
-            if (!gradeStr) return "Primary School";
-            const str = String(gradeStr).toLowerCase();
-
-            // Direct division matches
-            if (str.includes("primary") || str.includes("prek") || str.includes("kindergarten") || str.includes("k-5")) {
-                return "Primary School";
+        // Convert Google Drive view URLs to direct image source URLs
+        function formatMediaPreviewUrl(url, type) {
+            if (!url) return "";
+            if (url.includes("drive.google.com")) {
+                const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) {
+                    // Google Drive thumbnail API endpoint for high compatibility
+                    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+                }
             }
-            if (str.includes("middle") || str.includes("6-8")) {
-                return "Middle School";
-            }
-            if (str.includes("upper") || str.includes("high") || str.includes("9-12")) {
-                return "Upper School";
-            }
-
-            // Extract numerical grade values
-            const match = str.match(/\d+/);
-            if (match) {
-                const gradeNum = parseInt(match[0], 10);
-                if (gradeNum >= 0 && gradeNum <= 5) return "Primary School";
-                if (gradeNum >= 6 && gradeNum <= 8) return "Middle School";
-                if (gradeNum >= 9 && gradeNum <= 12) return "Upper School";
-            }
-
-            return "Primary School";
+            return url;
         }
 
+        // Extract filename from URL
         function extractFileName(url) {
             if (!url) return "";
             try {
-                const name = url.split('/').pop().split('?')[0];
-                return name.length > 30 ? name.substring(0, 27) + "..." : name;
-            } catch(e) {
-                return "Attached File";
+                const parts = url.split('/');
+                const last = parts[parts.length - 1];
+                return last.split('?')[0];
+            } catch (e) {
+                return "Attached Link";
             }
         }
 
-        // Render Posts into Primary, Middle, and Upper Columns
-        function renderFeeds(posts) {
-            const primaryFeed = document.getElementById('primaryFeed');
-            const middleFeed = document.getElementById('middleFeed');
-            const upperFeed = document.getElementById('upperFeed');
+        // Division routing logic for Primary, Middle, and Upper School
+        function parseDivisionFromGrade(gradeStr) {
+            if (!gradeStr) return "Upper";
+            const s = String(gradeStr).toLowerCase();
 
-            const primaryPosts = posts.filter(p => parseDivisionFromGrade(p.division || p.grade) === "Primary School");
-            const middlePosts = posts.filter(p => parseDivisionFromGrade(p.division || p.grade) === "Middle School");
-            const upperPosts = posts.filter(p => parseDivisionFromGrade(p.division || p.grade) === "Upper School");
+            // Upper School checks
+            if (s.includes("upper") || s.includes("us") || s.includes("high") || s.includes("9") || s.includes("10") || s.includes("11") || s.includes("12") || s.includes("freshman") || s.includes("sophomore") || s.includes("junior") || s.includes("senior")) {
+                return "Upper";
+            }
+            // Middle School checks
+            if (s.includes("middle") || s.includes("ms") || s.includes("6") || s.includes("7") || s.includes("8")) {
+                return "Middle";
+            }
+            // Primary School checks
+            if (s.includes("primary") || s.includes("lower") || s.includes("prek") || s.includes("kindergarten") || s.includes("1") || s.includes("2") || s.includes("3") || s.includes("4") || s.includes("5")) {
+                return "Primary";
+            }
+
+            return "Upper";
+        }
+
+        // Filter and Render posts across 3 divisions
+        function renderFeeds(posts) {
+            const primaryPosts = posts.filter(p => p.division === "Primary");
+            const middlePosts = posts.filter(p => p.division === "Middle");
+            const upperPosts = posts.filter(p => p.division === "Upper");
 
             document.getElementById('primaryCount').textContent = primaryPosts.length;
             document.getElementById('middleCount').textContent = middlePosts.length;
             document.getElementById('upperCount').textContent = upperPosts.length;
-            
-            // Detailed breakdown displaying counts for all 3 categories
-            document.getElementById('postCountBadge').innerHTML = `
-                <span class="font-extrabold text-kps-green">${posts.length} Total Posts</span>
-                <span class="mx-1 text-kps-gold">•</span>
-                <span>Primary: ${primaryPosts.length}</span>
-                <span class="mx-1 text-kps-gold">•</span>
-                <span>Middle: ${middlePosts.length}</span>
-                <span class="mx-1 text-kps-gold">•</span>
-                <span>Upper: ${upperPosts.length}</span>
-            `;
 
-            primaryFeed.innerHTML = primaryPosts.length > 0 
-                ? primaryPosts.map(createPostCardHTML).join('') 
-                : createEmptyStateHTML("Primary School (PreK–5)");
+            document.getElementById('primaryFeed').innerHTML = renderPostListHtml(primaryPosts, "Primary School");
+            document.getElementById('middleFeed').innerHTML = renderPostListHtml(middlePosts, "Middle School");
+            document.getElementById('upperFeed').innerHTML = renderPostListHtml(upperPosts, "Upper School");
 
-            middleFeed.innerHTML = middlePosts.length > 0 
-                ? middlePosts.map(createPostCardHTML).join('') 
-                : createEmptyStateHTML("Middle School (6–8)");
-
-            upperFeed.innerHTML = upperPosts.length > 0 
-                ? upperPosts.map(createPostCardHTML).join('') 
-                : createEmptyStateHTML("Upper School (9–12)");
+            const badge = document.getElementById('postCountBadge');
+            if (badge) {
+                badge.innerHTML = `<span class="text-kps-green font-bold"><i class="fa-solid fa-check-circle mr-1"></i> Live: ${posts.length} entries</span>`;
+            }
         }
 
-        // Generate Post Card HTML
-        function createPostCardHTML(post) {
-            return `
+        // Generate card HTML elements with enriched Image/File Previews
+        function renderPostListHtml(posts, divisionName) {
+            if (posts.length === 0) {
+                return `
+                    <div class="text-center py-12 px-4 bg-white rounded-xl border border-dashed border-slate-200">
+                        <i class="fa-regular fa-folder-open text-3xl text-slate-300 mb-2"></i>
+                        <p class="text-xs font-medium text-slate-500">No ${divisionName} updates posted yet.</p>
+                    </div>
+                `;
+            }
+
+            return posts.map(p => {
+                const previewUrl = formatMediaPreviewUrl(p.mediaUrl, p.mediaType);
+                
+                return `
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-center space-x-2.5">
-                            <div class="w-9 h-9 rounded-full bg-kps-lightgold text-kps-darkgreen border border-kps-gold flex items-center justify-center font-bold text-xs">
-                                ${post.name ? post.name.split(' ').map(n => n[0]).join('') : 'KP'}
+                    <!-- Top Header: Teacher Name & AI Tool Used -->
+                    <div class="flex items-start justify-between border-b border-slate-100 pb-2.5">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-full bg-kps-green text-kps-gold font-bold text-xs flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-user-tie text-xs"></i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-xs text-slate-800 leading-snug">${escapeHtml(post.name)}</h4>
-                                <p class="text-[10px] text-slate-500 font-medium">${escapeHtml(post.department)} • ${escapeHtml(post.grade)}</p>
+                                <h4 class="font-extrabold text-slate-900 text-sm leading-tight">${p.name}</h4>
+                                <span class="text-[10px] text-slate-500 font-medium">${p.department} &bull; ${p.grade}</span>
                             </div>
                         </div>
-                        <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-200/50">
-                            ${escapeHtml(post.type)}
-                        </span>
+                        <div class="text-right flex-shrink-0">
+                            <span class="inline-flex items-center space-x-1 bg-kps-lightgold text-kps-darkgreen text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-kps-gold/40 shadow-xs">
+                                <i class="fa-solid fa-wand-magic-sparkles text-kps-gold"></i>
+                                <span>${p.title}</span>
+                            </span>
+                            <p class="text-[9px] text-slate-400 font-medium mt-1">${p.date}</p>
+                        </div>
                     </div>
 
-                    <div>
-                        <h5 class="font-bold text-xs text-kps-green mb-1">${escapeHtml(post.title)}</h5>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-2">${escapeHtml(post.message)}</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">${p.message}</p>
 
-                        <!-- Media Attachment Box -->
-                        ${renderMediaAttachment(post)}
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-                        <span><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(post.date)}</span>
-                        <button onclick="likePost(this, ${post.likes})" class="hover:text-rose-500 transition flex items-center space-x-1 font-semibold text-slate-500">
-                            <i class="fa-regular fa-heart"></i>
-                            <span>${post.likes}</span>
-                        </button>
-                    </div>
+                    <!-- Rich Media & Attachment Preview Box -->
+                    ${p.mediaUrl ? `
+                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                            ${p.mediaType === 'image' ? `
+                                <div class="relative group bg-slate-900">
+                                    <img src="${previewUrl}" 
+                                         alt="${p.mediaTitle}" 
+                                         class="w-full h-44 object-cover hover:opacity-90 transition cursor-pointer"
+                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'p-3 text-xs text-slate-600 flex items-center space-x-2\'><i class=\'fa-solid fa-image text-kps-gold\'></i><span class=\'truncate\'>${p.mediaTitle}</span></div>';"
+                                         onclick="window.open('${p.mediaUrl}', '_blank')">
+                                    <div class="absolute bottom-2 right-2 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md flex items-center space-x-1">
+                                        <i class="fa-solid fa-expand text-[9px]"></i>
+                                        <span>Click to enlarge</span>
+                                    </div>
+                                </div>
+                            ` : p.mediaType === 'video' ? `
+                                <div class="p-3 flex items-center justify-between bg-amber-50/50 border-l-4 border-amber-500">
+                                    <div class="flex items-center space-x-2.5 truncate">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-circle-play text-base"></i>
+                                        </div>
+                                        <div class="truncate">
+                                            <p class="text-xs font-bold text-slate-800 truncate">${p.mediaTitle}</p>
+                                            <p class="text-[10px] text-slate-500">Video Attachment</p>
+                                        </div>
+                                    </div>
+                                    <a href="${p.mediaUrl}" target="_blank" rel="noopener noreferrer" class="bg-amber-600 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg hover:bg-amber-700 transition flex-shrink-0">
+                                        Watch Video
+                                    </a>
+                                </div>
+                            ` : `
+                                <a href="${p.mediaUrl}" target="_blank" rel="noopener noreferrer" class="p-3 flex items-center justify-between hover:bg-slate-100 transition group">
+                                    <div class="flex items-center space-x-2.5 truncate">
+                                        <div class="w-8 h-8 rounded-lg bg-kps-lightgold text-kps-green flex items-center justify-center flex-shrink-0 border border-kps-gold/30">
+                                            <i class="fa-solid ${p.mediaType === 'document' ? 'fa-file-lines' : 'fa-paperclip'} text-sm"></i>
+                                        </div>
+                                        <div class="truncate">
+                                            <p class="text-xs font-bold text-slate-800 group-hover:text-kps-green transition truncate">${p.mediaTitle}</p>
+                                            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">${p.mediaType}</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-kps-green font-bold flex items-center space-x-1 flex-shrink-0">
+                                        <span>View</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                                    </span>
+                                </a>
+                            `}
+                        </div>
+                    ` : ''}
                 </div>
             `;
+            }).join('');
         }
 
-        // Render Media Attachment HTML (Photos, Videos, PDFs/Files)
-        function renderMediaAttachment(post) {
-            if (!post.mediaUrl) return '';
-
-            const title = escapeHtml(post.mediaTitle || 'Attached Media');
-            const url = escapeHtml(post.mediaUrl);
-
-            if (post.mediaType === 'photo') {
-                return `
-                    <div class="mt-2 rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
-                        <div class="bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 flex items-center justify-between border-b border-slate-200">
-                            <span class="truncate"><i class="fa-solid fa-image text-kps-green mr-1.5"></i>${title}</span>
-                            <span class="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Photo</span>
-                        </div>
-                        <a href="${url}" target="_blank" class="block group relative overflow-hidden">
-                            <img src="${url}" alt="${title}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=&quot;p-3 text-[11px] text-slate-500 italic&quot;><i class=&quot;fa-solid fa-paperclip mr-1&quot;></i>${title}</div>';">
-                        </a>
-                    </div>
-                `;
-            } else if (post.mediaType === 'video') {
-                return `
-                    <div class="mt-2 rounded-lg border border-slate-200 overflow-hidden bg-slate-900 text-white">
-                        <div class="bg-slate-800 px-2.5 py-1 text-[10px] font-bold text-slate-200 flex items-center justify-between border-b border-slate-700">
-                            <span class="truncate"><i class="fa-solid fa-video text-kps-gold mr-1.5"></i>${title}</span>
-                            <span class="text-[9px] uppercase tracking-wider text-kps-gold font-semibold">Video</span>
-                        </div>
-                        <video controls class="w-full h-40 object-cover bg-black">
-                            <source src="${url}">
-                            Your browser does not support video playback.
-                        </video>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="mt-2 rounded-lg border border-slate-200 bg-kps-lightgold/50 p-2.5 flex items-center justify-between hover:border-kps-gold transition">
-                        <div class="flex items-center space-x-2.5 truncate">
-                            <div class="w-8 h-8 rounded-lg bg-kps-green text-kps-gold flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-sm">
-                                <i class="fa-solid fa-file-pdf"></i>
-                            </div>
-                            <div class="truncate">
-                                <p class="text-[11px] font-bold text-slate-800 truncate leading-snug">${title}</p>
-                                <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Document / Attachment</p>
-                            </div>
-                        </div>
-                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="bg-kps-green hover:bg-kps-darkgreen text-white text-[10px] px-2.5 py-1.5 rounded-md font-bold transition flex items-center space-x-1 flex-shrink-0 ml-2">
-                            <span>Open</span>
-                            <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
-                        </a>
-                    </div>
-                `;
-            }
-        }
-
-        // Empty state card generator
-        function createEmptyStateHTML(divisionName) {
-            return `
-                <div class="bg-white rounded-xl p-6 text-center border border-dashed border-slate-300 text-slate-400 space-y-2">
-                    <i class="fa-regular fa-folder-open text-2xl text-slate-300"></i>
-                    <p class="text-xs font-medium">No posts submitted for ${divisionName} yet.</p>
-                </div>
-            `;
-        }
-
-        // Helper to escape HTML string
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-        }
-
-        // Like button toggle handler
-        function likePost(btn, currentLikes) {
-            const icon = btn.querySelector('i');
-            const span = btn.querySelector('span');
-            if (icon.classList.contains('fa-regular')) {
-                icon.classList.remove('fa-regular');
-                icon.classList.add('fa-solid', 'text-rose-500');
-                span.textContent = currentLikes + 1;
-            } else {
-                icon.classList.remove('fa-solid', 'text-rose-500');
-                icon.classList.add('fa-regular');
-                span.textContent = currentLikes;
-            }
-        }
-
-        // Modal triggers for Apps Script guide
+        // Script modal toggles
         function showScriptGuideModal() {
-            document.getElementById('scriptModal').classList.remove('hidden');
+            const modal = document.getElementById('scriptModal');
+            if (modal) modal.classList.remove('hidden');
         }
 
         function closeScriptGuideModal() {
-            document.getElementById('scriptModal').classList.add('hidden');
+            const modal = document.getElementById('scriptModal');
+            if (modal) modal.classList.add('hidden');
         }
 
         function copyScriptCode() {
             const code = document.getElementById('codeSnippet').innerText;
-            const textarea = document.createElement('textarea');
-            textarea.value = code;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert('Apps Script code copied to clipboard!');
+            navigator.clipboard.writeText(code);
         }
     </script>
 </body>
